@@ -11,25 +11,32 @@
 			<a href='/posts/add'>Add a post<a>
 			<a href='/posts/index'>View post<a>
 			<a href='/posts/users'>Users<a>
-			
-			
         <!-- Menu options for users who are not logged in -->
         <?php else: ?>
 
             <a href='/users/signup'>Sign up</a>
             <a href='/users/index'>Log in</a>
-        <?php endif; ?>      
+        <?php endif; ?>
         
 </div>
-<br>
+
 <br>
 <br>
 <div id ='windows'>
-<h4> Say something!</h4>
-<form method='POST' action='/posts/p_add'>
-    <textarea name='content' id='content' style= ";height:100px;width:400px;"></textarea>
-    <input type='Submit' value='New post'>
+<br>
+<?php foreach($posts as $post): ?>
 
-</form> 
+<article>
 
+    <h1><?=$post['first_name']?> <?=$post['last_name']?> posted:</h1>
+
+    <p><?=$post['content']?></p>
+
+    <time datetime="<?=Time::display($post['created'],'Y-m-d G:i')?>">
+        <?=Time::display($post['created'])?>
+    </time>
+
+</article>
+
+<?php endforeach; ?>
 </div>

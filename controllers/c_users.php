@@ -9,32 +9,83 @@ class users_controller extends base_controller {
         echo "This is the index page";
     }
 
-    public function signup() {
+    public function signup($uniqueness=NULL) {
         
         # Set up the view
-        $this->template->client_files_head = '<link rel="stylesheet" href="/css/main.css" type="text/css">';
-        $this->template->content = View:: instance('v_users_signup');
+        $this->template->content = View:: instance('v_index_index');
+        
+        $this->template->content->uniqueness = $uniqueness;
+        
+        #Render the view
+        echo $this->template;
+    }
+    
+    public function check($blankness=NULL) {
+        
+        # Set up the view
+        $this->template->content = View:: instance('v_index_index');
+        
+        $this->template->content->blankness = $blankness;
         
         #Render the view
         echo $this->template;
     }
     
     
+    
     public function p_signup()
     {
-     
-     $_POST['created'] = Time::now();
-     $_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']); 
-     $_POST['token'] = sha1(TOKEN_SALT.$_POST['EMAIL'].Utils::generate_random_string());
-     DB::instance(DB_NAME)->insert_row('users',$_POST);
-     
-     echo 'You\'re signed up';
+    	// check whether any field is not filled
+    	$firstname = $_POST['first_name'];
+		$lastname = $_POST['last_name'];
+		$email = $_POST['email'];
+		$password = $_POST['password'];
+    
+    	if(empty($firstname) || empty($lastname) || empty($password) || empty($email))
+    	{
+    		Router::redirect("/users/check/blankness");
+    	}
+    
+    	// check the uniqueness of the email
+     	$q= "SELECT COUNT(*) 
+        	FROM users 
+        	WHERE email ='$email'";
+    	$token = DB::instance(DB_NAME)->select_field($q);
+    
+    	if($token) 
+		{
+			Router::redirect("/users/signup/uniqueness");
+		}
+			
+		else 
+		{
+     		$_POST['created'] = Time::now();
+     	 	$_POST['modified'] = Time::now();
+     		$_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']); 
+     		$_POST['token'] = sha1(TOKEN_SALT.$_POST['email'].Utils::generate_random_string());
+
+	     	# Insert the new user    
+		    $user_id = DB::instance(DB_NAME)->insert_row('users', $_POST);
+	    
+     		# Go ahead and log them in
+	    	if($user_id) 
+	    	{
+		    	setcookie('token',$_POST['token'], strtotime('+1 year'), '/');
+			}
+	    	$to = $_POST['email'] ;
+			$subject = "Thanks for signing up";
+			$message = "Congradulations on signup.";
+			$from = "hhuangweijia@gmail.com";
+			$headers = "From:" . $from;
+			mail($to,$subject,$message,$headers);
+	    	
+	    	# Send them to their profile
+	    	Router::redirect('/users/profile');
+    	}
     }
     
     
-
-    public function login($error=NULL) {
-        
+    public function login($error=NULL) {    
         #
         $this->template-> content = View::instance('v_users_login');
         
@@ -54,14 +105,15 @@ class users_controller extends base_controller {
     $_POST = DB::instance(DB_NAME)->sanitize($_POST);
 
     # Hash submitted password so we can compare it against one in the db
-    $_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);
-
+    $_POST['password1'] = sha1(PASSWORD_SALT.$_POST['password1']);
+	
+	
     # Search the db for this email and password
     # Retrieve the token if it's available
     $q = "SELECT token 
         FROM users 
-        WHERE email = '".$_POST['email']."' 
-        AND password = '".$_POST['password']."'";
+        WHERE email = '".$_POST['email1']."' 
+        AND password = '".$_POST['password1']."'";
 
     $token = DB::instance(DB_NAME)->select_field($q);
 	
@@ -78,22 +130,22 @@ class users_controller extends base_controller {
         param 4 = the path of the cooke (a single forward slash sets it for the entire domain)
         */
         setcookie("token", $token, strtotime('+1 year'), '/');
-
+		
         # Send them to the main page - or whever you want them to go
-        Router::redirect("/users/profile");
+        Router::redirect("/posts/index");
     }
+    
     else
 	{
         # Send them back to the login page
         Router::redirect("/users/login/error");
-
-    # But if we did, login succeeded! 
     }
 }
 
     public function logout() 
     {
-    	 # Generate and save a new token for next login
+    
+    # Generate and save a new token for next login
     $new_token = sha1(TOKEN_SALT.$this->user->email.Utils::generate_random_string());
 
     # Create the data array we'll use with the update method
@@ -112,33 +164,28 @@ class users_controller extends base_controller {
     
 
     public function profile($user_name = NULL) {
-    
-    	// Set up the view
+  
+    	# check whether the users is loged in or not
+    	if(!$this->user)
+    	{
+    		echo "Members only";
+    		Router:redirect("/index/index");
+    	}
+    	else
+    	{
     	
-    	$this->template-> content = View::instance('v_users_profile');
-    	$this->template->title = " Profile";
+    		# Create a new View instance
+    		$view = View::instance('v_users_profile');
+    		$this->template-> content = View::instance('v_users_profile');
+    		
+    		# Pass information to the view instance
     	
-    	
-    	// Pass the data to the View
-    	
-    	$this->template->client_files_head = Utils::load_client_files($client_files_head);
-    	
-    	$client_files_body = Array('/js/master.js');
-    	
-    	$this->template->client_files_body = Utils::load_client_files($client_files_body);
-    	// Dsiplay the view
-    	echo $this->template;
-    	
-    	//$template = View::instance('_vVtemplate');
-    
-    //	$view = View::instance('v_users_profile');
-    	
-    //	$view-> user_name = $user_name;
-    	
-    //	$view-> color = "red";
-    	
-    //	echo $view;
-
+    		$this->template->title = " Profile";
+    		
+    		$view->user_name = $user_name;
+    		# Render View
+    		echo $this-> template ;
+    	}
     }
 
 } # end of the class

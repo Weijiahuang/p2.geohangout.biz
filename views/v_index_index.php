@@ -1,21 +1,22 @@
-<h1>Welcome to <?=APP_NAME?><?php if($user) echo ', '.$user->first_name; ?></h1>
-<div class="container">
-		
+<div id="menu">
+<div id size="fontsize" >
+Geohangout
+</div>
 </div>
 
 <div id ="loginbox">
 <h3>Login<h3>
 <form method ='POST' action = '/users/p_login'>
-  <input type="text" name="email" style="width:200px; height:20px;" placeholder="Email"><br><br>
-  <input type="password" name="password" style="width:200px; height:20px;"placeholder="Password"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="text" name="email1" style="width:200px; height:20px;" placeholder="Email"><br><br>
+  <input type="password" name="password1" style="width:200px; height:20px;"placeholder="Password"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <input type="Submit" value="Log in" style="width:60px; height:30px;" background-color="green;"><br>
    
-   <?php if(isset($error)): ?>
-	
+   <?php if(isset($error)): ?>	
+		<div class='error'>
             Login failed. Please double check your email and password
-        <br>
-        
+        </div>        
     <?php endif; ?>
+    
   <input type="checkbox" name="vehicle" value="Car"> Remember-<span style="color:blue;font-weight:bold"> <a href="" style="text-decoration:none">Forget? </a></span>
 </form>
 </div>
@@ -26,9 +27,20 @@
 	First Name <input type = 'text' name = 'first_name' style="width:200px; height:20px;" placeholder="First name"> <br> <br>
 	Last Name <input type ='text' name = 'last_name' style="width:200px; height:20px;" placeholder="Last name"><br><br>
 	Email &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type ='text' name = 'email' style="width:200px; height:20px;" placeholder="Email"><br><br>
-	Password &nbsp; <input type ='password' name = 'password' style="width:200px; height:20px;"  placeholder="Passwords"><br><br>
+	Password &nbsp; <input type ='password' name = 'password' style="width:200px; height:20px;"  placeholder="Passwords">
+
+<?php if(isset($uniqueness)): ?>
+		<div class = "error">
+			Signup failed, you already have an account.
+		</div>			
+<?php endif; ?>	
+
+<?php if(isset($blankness)):?>
+		<div class = "error">
+			Please fill in the blank filed(s).
+		</div>			
+<?php endif; ?>	
+
 	<input type = 'submit' value = 'Sign Up' style="width:60px; height:30px;"> <br>
 </form>
 <div>
-
-<h2> Log in </h2>
