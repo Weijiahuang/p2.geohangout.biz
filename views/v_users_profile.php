@@ -30,7 +30,7 @@
 <div id ='windows'>
 <br>
 <h1> One step away, upload your picture</h1> 
-<form action="upload_file.php" method="post"
+<form action="/users/p_upload" method="post"
 enctype="multipart/form-data">
 <label for="file">Filename:</label>
 <input type="file" name="file" id="file"><br>

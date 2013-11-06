@@ -8,6 +8,19 @@ class users_controller extends base_controller {
     public function index() {
         echo "This is the index page";
     }
+    
+    public function p_upload()
+	{
+		//upload piture and store the name of the picture
+		$filename= $_FILES["file"]["name"];
+		Upload::upload($_FILES, "/uploads/", array("jpg", "jpeg", "gif", "png"), $filename);
+		
+		$data = Array("picture" => $filename);		
+		
+		DB::instance(DB_NAME)->update("users", $data, "WHERE user_id = '".$this->user->user_id."'");
+		
+		Router::redirect("/posts/users");
+	}
 
  	# Check duplicate email
     public function signup($uniqueness=NULL) {
