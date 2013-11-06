@@ -3,6 +3,7 @@
 Geohangout
 </div>
 </div>
+<h3 style="color:#abcdef;"> +features: duplicate email checking, blank fields checking, login in error checking, picture upload<h3>
 
 <div id ="loginbox">
 <h3>Login<h3>
